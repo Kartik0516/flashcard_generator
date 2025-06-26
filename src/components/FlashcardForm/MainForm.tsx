@@ -19,6 +19,21 @@ interface MainFormProps {
 }
 
 const MainForm: React.FC<MainFormProps> = ({ formik }) => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.log('Image failed to load:', formik.values.image);
+    e.currentTarget.style.display = 'none';
+  };
+
+  const isValidImageUrl = (url: string) => {
+    if (!url) return false;
+    try {
+      new URL(url);
+      return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">Create Group</h2>
@@ -63,20 +78,40 @@ const MainForm: React.FC<MainFormProps> = ({ formik }) => {
             name="image"
             type="url"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter image URL"
+            placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
           />
+          
+          {/* Image Preview */}
           {formik.values.image && (
             <div className="mt-3">
-              <img
-                src={formik.values.image}
-                alt="Preview"
-                className="w-32 h-24 object-cover rounded-lg border border-gray-200"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+              {isValidImageUrl(formik.values.image) ? (
+                <div className="relative">
+                  <img
+                    src={formik.values.image}
+                    alt="Preview"
+                    className="w-32 h-24 object-cover rounded-lg border border-gray-200"
+                    onError={handleImageError}
+                    onLoad={() => console.log('Image loaded successfully:', formik.values.image)}
+                  />
+                  <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded">
+                    ✓
+                  </div>
+                </div>
+              ) : (
+                <div className="w-32 h-24 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-red-500 text-xs">Invalid URL</div>
+                    <div className="text-red-400 text-xs">Check format</div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+          
+          {/* Helper text */}
+          <p className="mt-2 text-xs text-gray-500">
+            Supported formats: JPG, PNG, GIF, WebP, SVG. Use direct image URLs.
+          </p>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiEye, FiCalendar, FiHash } from 'react-icons/fi';
+import { FiTrash2, FiEye, FiCalendar, FiHash, FiImage } from 'react-icons/fi';
 import { Flashcard } from '../../types';
 
 interface FlashcardCardProps {
@@ -17,17 +17,35 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({ flashcard, onDelete }) =>
     }
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.log('Flashcard image failed to load:', flashcard.image);
+    e.currentTarget.style.display = 'none';
+    // Show placeholder
+    const parent = e.currentTarget.parentElement;
+    if (parent) {
+      parent.innerHTML = `
+        <div class="h-48 w-full bg-gray-100 flex items-center justify-center rounded-t-xl">
+          <div class="text-center text-gray-400">
+            <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+            <p class="text-sm">Image not available</p>
+          </div>
+        </div>
+      `;
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group">
       {flashcard.image && (
-        <div className="h-48 w-full">
+        <div className="h-48 w-full relative">
           <img
             src={flashcard.image}
             alt={flashcard.title}
             className="w-full h-full object-cover rounded-t-xl"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            onError={handleImageError}
+            onLoad={() => console.log('Flashcard image loaded:', flashcard.image)}
           />
         </div>
       )}
@@ -57,6 +75,12 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({ flashcard, onDelete }) =>
               <FiCalendar size={14} />
               <span>{new Date(flashcard.createdAt).toLocaleDateString()}</span>
             </span>
+            {flashcard.image && (
+              <span className="flex items-center space-x-1">
+                <FiImage size={14} />
+                <span>Image</span>
+              </span>
+            )}
           </div>
         </div>
         

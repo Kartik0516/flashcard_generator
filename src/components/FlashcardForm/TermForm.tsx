@@ -30,6 +30,21 @@ const TermForm: React.FC<TermFormProps> = ({ formik }) => {
     }
   };
 
+  const isValidImageUrl = (url: string) => {
+    if (!url) return false;
+    try {
+      new URL(url);
+      return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+    } catch {
+      return false;
+    }
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>, index: number) => {
+    console.log(`Term ${index + 1} image failed to load:`, formik.values.terms[index].image);
+    e.currentTarget.style.display = 'none';
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
       <div className="flex items-center justify-between mb-6">
@@ -106,8 +121,35 @@ const TermForm: React.FC<TermFormProps> = ({ formik }) => {
                     name={`terms.${index}.image`}
                     type="url"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter image URL"
+                    placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
                   />
+                  
+                  {/* Image Preview for Terms */}
+                  {term.image && (
+                    <div className="mt-2">
+                      {isValidImageUrl(term.image) ? (
+                        <div className="relative inline-block">
+                          <img
+                            src={term.image}
+                            alt={`Preview for ${term.title || 'term'}`}
+                            className="w-24 h-18 object-cover rounded border border-gray-200"
+                            onError={(e) => handleImageError(e, index)}
+                            onLoad={() => console.log(`Term ${index + 1} image loaded:`, term.image)}
+                          />
+                          <div className="absolute top-0 right-0 bg-green-500 text-white text-xs px-1 rounded">
+                            ✓
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-24 h-18 bg-red-50 border border-red-200 rounded flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-red-500 text-xs">Invalid</div>
+                            <div className="text-red-400 text-xs">URL</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
